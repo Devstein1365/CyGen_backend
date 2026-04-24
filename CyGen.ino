@@ -7,31 +7,31 @@
 const char* ssid = "DevStein";
 const char* password = "";
 
-// 🌐 Backend URL
+// Backend URL
 const char* serverUrl = "http://192.168.0.145:5000/data";
 
-// 🖥️ LCD
+// LCD
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// ⚙️ RPM
+// RPM
 #define RPM_PIN D5
 volatile int pulseCount = 0;
 unsigned long lastRPMTime = 0;
 float rpm = 0;
 
-// ⚡ Voltage
+// Voltage
 #define VOLTAGE_PIN A0
 float voltage = 0;
 
-// 🔋 Battery config (REAL BATTERY VALUES)
+// Battery config (REAL BATTERY VALUES)
 float FULL_VOLTAGE = 12.6;
 float MIN_VOLTAGE = 11.0;
 
-// ⏱️ Timing
+// Timing
 unsigned long lastSendTime = 0;
 unsigned long lastLCDTime = 0;
 
-// 🧠 Interrupt
+// Interrupt
 void IRAM_ATTR countPulse() {
   pulseCount++;
 }
@@ -61,7 +61,7 @@ void setup() {
     Serial.print(".");
   }
 
-  Serial.println("\n✅ WiFi Connected");
+  Serial.println("\n WiFi Connected");
   Serial.println(WiFi.localIP());
 }
 
@@ -83,7 +83,7 @@ void loop() {
     lastRPMTime = millis();
   }
 
-  // ⚡ Voltage (FIXED SCALING FOR YOUR SENSOR)
+  // Voltage 
   int raw = analogRead(VOLTAGE_PIN);
   float measuredVoltage = raw * (3.3 / 1023.0);
 
@@ -91,12 +91,12 @@ void loop() {
   float scaleFactor = 12.6 / 2.21;
   voltage = measuredVoltage * scaleFactor;
 
-  // 🔋 Battery %
+  // Battery %
   float batteryFloat = (voltage - MIN_VOLTAGE) / (FULL_VOLTAGE - MIN_VOLTAGE) * 100.0;
   batteryFloat = constrain(batteryFloat, 0, 100);
   int battery = (int)batteryFloat;
 
-  // 🔋 Status
+  // Status
   String chargingStatus;
 
   if (battery >= 98) {
@@ -114,13 +114,13 @@ void loop() {
 
   bool isPedaling = rpm > 5;
 
-  // ⏳ ETA
+  // ETA
   int etaToFull = 0;
   if (isPedaling && battery < 100) {
     etaToFull = (100 - battery) / 2;
   }
 
-  // 📦 JSON
+  // JSON
   String json = "{";
   json += "\"battery\":" + String(battery) + ",";
   json += "\"voltage\":" + String(voltage, 2) + ",";
@@ -130,7 +130,7 @@ void loop() {
   json += "\"etaToFull\":" + String(etaToFull);
   json += "}";
 
-  // 🌐 SEND TO BACKEND
+  // sending data to backend
   if (millis() - lastSendTime >= 2000) {
     lastSendTime = millis();
 
@@ -151,7 +151,7 @@ void loop() {
     }
   }
 
-  // 🖥️ LCD DISPLAY
+  // LCD DISPLAY
   if (millis() - lastLCDTime >= 1000) {
     lastLCDTime = millis();
 
